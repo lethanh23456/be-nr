@@ -8,11 +8,20 @@ import org.springframework.http.HttpStatus;
 import java.util.*;
 import com.example.NROBACKEND.entity.DeTu;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.NROBACKEND.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     private final UserService userService;
 
@@ -21,27 +30,158 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public boolean register(@RequestBody User user) {
-        // kiểm tra username trùng
+    public ResponseEntity<?> register(@RequestBody User user) {
+        // Kiểm tra username đã tồn tại
         if (userService.existsByUsername(user.getUsername())) {
-            return false;
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Username đã tồn tại");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
-        userService.saveUser(user);
-        return true;
+
+        User savedUser = userService.saveUser(user);
+
+
+        String token = jwtUtil.generateToken(savedUser.getUsername());
+
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("token", token);
+        response.put("user", convertUserToMap(savedUser));
+        response.put("message", "Đăng ký thành công");
+
+        return ResponseEntity.ok(response);
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
+        // Tìm user theo username
         User found = userService.findByUsername(user.getUsername());
+
+
         if (found == null || !found.getPassword().equals(user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Username hoặc password không đúng");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
+
+
         if (!found.isDaVaoTaiKhoanLanDau()) {
             found.setDaVaoTaiKhoanLanDau(true);
             userService.saveUser(found);
         }
-        return ResponseEntity.ok(found); // login ok
+
+
+        String token = jwtUtil.generateToken(found.getUsername());
+
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("token", token);
+        response.put("user", convertUserToMap(found));
+        response.put("message", "Đăng nhập thành công");
+
+        return ResponseEntity.ok(response);
     }
+
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String authHeader) {
+        // Kiểm tra header
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("valid", false);
+            error.put("message", "Token không hợp lệ");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+
+
+        String token = authHeader.substring(7);
+
+
+        if (jwtUtil.validateToken(token)) {
+            String username = jwtUtil.getUsernameFromToken(token);
+            User user = userService.findByUsername(username);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("valid", true);
+            response.put("user", convertUserToMap(user));
+            response.put("message", "Token hợp lệ");
+
+            return ResponseEntity.ok(response);
+        } else {
+            Map<String, Object> error = new HashMap<>();
+            error.put("valid", false);
+            error.put("message", "Token không hợp lệ hoặc đã hết hạn");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+    }
+
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        // Kiểm tra header
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Token không hợp lệ");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+
+        String token = authHeader.substring(7);
+
+
+        if (!jwtUtil.validateToken(token)) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Token không hợp lệ hoặc đã hết hạn");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+
+
+        String username = jwtUtil.getUsernameFromToken(token);
+        User user = userService.findByUsername(username);
+
+        if (user == null) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "User không tồn tại");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("user", convertUserToMap(user));
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    private Map<String, Object> convertUserToMap(User user) {
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id", user.getId());
+        userMap.put("username", user.getUsername());
+        userMap.put("daVaoTaiKhoanLanDau", user.isDaVaoTaiKhoanLanDau());
+
+        // Các trường về tiền tệ và tài nguyên game
+        userMap.put("ngoc", user.getNgoc());
+        userMap.put("ngoc_nap_tu_web", user.getNgocNapTuWeb());
+        userMap.put("suc_manh", user.getSucManh());
+        userMap.put("vang", user.getVang());
+        userMap.put("vang_nap_tu_web", user.getVangNapTuWeb());
+
+        // Thêm các trường khác nếu có
+        // userMap.put("email", user.getEmail());
+        // userMap.put("createdAt", user.getCreatedAt());
+
+        // KHÔNG thêm password vào response
+        return userMap;
+    }
+
 
     @PostMapping("/saveGame")
     public ResponseEntity<String> saveGame(@RequestBody User user) {
