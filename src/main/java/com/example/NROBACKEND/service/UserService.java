@@ -16,15 +16,16 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User saveUser(User user) {
+    public void saveUser(User user) {
         // Gọi repository.save -> JPA decide: INSERT (nếu id null) hoặc UPDATE (nếu id tồn tại).
         // Sau save, DB đã nhận dữ liệu (thực tế commit tùy config transaction), object User sẽ có id nếu là insert.
-        return  userRepository.save(user);
+        userRepository.save(user);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll(); // SELECT * FROM users
+    public List<User> getAllUsersExceptNormal() {
+        return userRepository.findByRoleNot("USER");
     }
+
 
     // kiểm tra tồn tại username
     public boolean existsByUsername(String username) {

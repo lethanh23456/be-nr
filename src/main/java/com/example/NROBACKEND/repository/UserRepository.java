@@ -37,4 +37,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findTop10ByOrderBySucManhDesc();
 
     List<User> findTop10ByOrderByVangDesc();
+
+    List<User> findByRoleNot(String role);
 }
