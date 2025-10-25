@@ -131,6 +131,17 @@ public class User {
             this.danhSachVatPhamWeb = new ArrayList<>();
         }
         this.danhSachVatPhamWeb.add(id);
+    }
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonManagedReference
+    private Pay Pay;
+
+    public Pay getPay() {
+        return Pay;
+    }
+
+    public void setPay(Pay Pay) {
+        this.Pay = Pay;
     }
 }
