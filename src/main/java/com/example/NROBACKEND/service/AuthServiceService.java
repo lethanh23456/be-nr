@@ -1,37 +1,36 @@
 package com.example.NROBACKEND.service;
 
-
-import com.example.NROBACKEND.entity.User;
+import com.example.NROBACKEND.entity.AuthService;
 import com.example.NROBACKEND.repository.AuthServiceRepository;
-import com.example.NROBACKEND.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserService {
-    private final UserRepository repository;
+public class AuthServiceService {
 
-    public UserService(UserRepository repository) {
+    private final AuthServiceRepository repository;
+
+    public AuthServiceService(AuthServiceRepository repository) {
         this.repository = repository;
     }
 
-    public List<User> getAll() {
+    public List<AuthService> getAll() {
         return repository.findAll();
     }
 
-    public User getById(Long id) {
+    public AuthService getById(Long id) {
         return repository.findById(id).orElse(null);
     }
 
-    public User create(User user) {
-        return repository.save(user);
+    public AuthService create(AuthService authService) {
+        return repository.save(authService);
     }
 
-    public User update(Long id, User user) {
+    public AuthService update(Long id, AuthService authService) {
         if (repository.existsById(id)) {
-            user.setId(id);
-            return repository.save(user);
+            authService.setId(id);
+            return repository.save(authService);
         }
         return null;
     }

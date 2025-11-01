@@ -1,98 +1,217 @@
 package com.example.NROBACKEND.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "items")
+@Table(name = "item")
 public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String maItem; // mã định danh item (map sang client)
-    private String ten;
-    private String loai;
-    @Column(columnDefinition = "TEXT")
-    private String moTa;
-
-    private int soLuong;
-    private String hanhTinh;
-    private String setKichHoat;
-
-    private int soSaoPhaLe;
-    private int soSaoPhaLeCuongHoa;
-    private int soCap;
-
-    private float hanSuDung;
-    private long sucManhYeuCau;
-
-    private String linkTexture;
-
-    // Lưu chỉ số dưới dạng JSON string (vd: {"atk":100,"def":50})
-    @Column(columnDefinition = "json")
-    private String chiso;
-
-    // Nơi item đang nằm: hanhtrang, ruongdo, hanhtrangdetu, hanhtrangdangmac
-    private String viTri;
-
-    // Quan hệ N-1: nhiều item thuộc về 1 user
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    @com.fasterxml.jackson.annotation.JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    // Getters & Setters
-    public String getMaItem() { return maItem; }
-    public void setMaItem(String maItem) { this.maItem = maItem; }
+    @Column(name = "ma_item")
+    private String maItem;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    private String ten;
+    private String loai;
+    private String mota;
+    private String soluong;
+    private String hanhlim;
 
-    public String getTen() { return ten; }
-    public void setTen(String ten) { this.ten = ten; }
+    @Column(name = "set_kich_hoat")
+    private String setKichHoat;
 
-    public String getLoai() { return loai; }
-    public void setLoai(String loai) { this.loai = loai; }
+    @Column(name = "so_sao_pha_le")
+    private String soSaoPhale;
 
-    public String getMoTa() { return moTa; }
-    public void setMoTa(String moTa) { this.moTa = moTa; }
+    @Column(name = "so_sao_pha_le_cuong_hoa")
+    private String soSaoPhaleCuongHoa;
 
-    public int getSoLuong() { return soLuong; }
-    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
+    @Column(name = "so_cap")
+    private String soCap;
 
-    public String getHanhTinh() { return hanhTinh; }
-    public void setHanhTinh(String hanhTinh) { this.hanhTinh = hanhTinh; }
+    @Column(name = "han_su_dung")
+    private Float hanSuDung;
 
-    public String getSetKichHoat() { return setKichHoat; }
-    public void setSetKichHoat(String setKichHoat) { this.setKichHoat = setKichHoat; }
+    @Column(name = "suc_manh_yeu_cau")
+    private Integer sucManhYeuCau;
 
-    public String getLinkTexture() { return linkTexture; }
-    public void setLinkTexture(String linkTexture) { this.linkTexture = linkTexture; }
+    @Column(name = "link_lea")
+    private String linkLea;
+
+    private String chisogiap;
+
+    @Column(name = "vutru")
+    private String vutru;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
 
-    public int getSoSaoPhaLe() { return soSaoPhaLe; }
-    public void setSoSaoPhaLe(int soSaoPhaLe) { this.soSaoPhaLe = soSaoPhaLe; }
+    @OneToOne(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserWebItem userWebItem;
 
-    public int getSoSaoPhaLeCuongHoa() { return soSaoPhaLeCuongHoa; }
-    public void setSoSaoPhaLeCuongHoa(int soSaoPhaLeCuongHoa) { this.soSaoPhaLeCuongHoa = soSaoPhaLeCuongHoa; }
 
-    public int getSoCap() { return soCap; }
-    public void setSoCap(int soCap) { this.soCap = soCap; }
+    public Long getId() {
+        return id;
+    }
 
-    public float getHanSuDung() { return hanSuDung; }
-    public void setHanSuDung(float hanSuDung) { this.hanSuDung = hanSuDung; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public long getSucManhYeuCau() { return sucManhYeuCau; }
-    public void setSucManhYeuCau(long sucManhYeuCau) { this.sucManhYeuCau = sucManhYeuCau; }
+    public User getUser() {
+        return user;
+    }
 
-    public String getChiso() { return chiso; }
-    public void setChiso(String chiso) { this.chiso = chiso; }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    public String getViTri() { return viTri; }
-    public void setViTri(String viTri) { this.viTri = viTri; }
+    public String getMaItem() {
+        return maItem;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setMaItem(String maItem) {
+        this.maItem = maItem;
+    }
+
+    public String getTen() {
+        return ten;
+    }
+
+    public void setTen(String ten) {
+        this.ten = ten;
+    }
+
+    public String getLoai() {
+        return loai;
+    }
+
+    public void setLoai(String loai) {
+        this.loai = loai;
+    }
+
+    public String getMota() {
+        return mota;
+    }
+
+    public void setMota(String mota) {
+        this.mota = mota;
+    }
+
+    public String getSoluong() {
+        return soluong;
+    }
+
+    public void setSoluong(String soluong) {
+        this.soluong = soluong;
+    }
+
+    public String getHanhlim() {
+        return hanhlim;
+    }
+
+    public void setHanhlim(String hanhlim) {
+        this.hanhlim = hanhlim;
+    }
+
+    public String getSetKichHoat() {
+        return setKichHoat;
+    }
+
+    public void setSetKichHoat(String setKichHoat) {
+        this.setKichHoat = setKichHoat;
+    }
+
+    public String getSoSaoPhale() {
+        return soSaoPhale;
+    }
+
+    public void setSoSaoPhale(String soSaoPhale) {
+        this.soSaoPhale = soSaoPhale;
+    }
+
+    public String getSoSaoPhaleCuongHoa() {
+        return soSaoPhaleCuongHoa;
+    }
+
+    public void setSoSaoPhaleCuongHoa(String soSaoPhaleCuongHoa) {
+        this.soSaoPhaleCuongHoa = soSaoPhaleCuongHoa;
+    }
+
+    public String getSoCap() {
+        return soCap;
+    }
+
+    public void setSoCap(String soCap) {
+        this.soCap = soCap;
+    }
+
+    public Float getHanSuDung() {
+        return hanSuDung;
+    }
+
+    public void setHanSuDung(Float hanSuDung) {
+        this.hanSuDung = hanSuDung;
+    }
+
+    public Integer getSucManhYeuCau() {
+        return sucManhYeuCau;
+    }
+
+    public void setSucManhYeuCau(Integer sucManhYeuCau) {
+        this.sucManhYeuCau = sucManhYeuCau;
+    }
+
+    public String getLinkLea() {
+        return linkLea;
+    }
+
+    public void setLinkLea(String linkLea) {
+        this.linkLea = linkLea;
+    }
+
+    public String getChisogiap() {
+        return chisogiap;
+    }
+
+    public void setChisogiap(String chisogiap) {
+        this.chisogiap = chisogiap;
+    }
+
+    public String getVutru() {
+        return vutru;
+    }
+
+    public void setVutru(String vutru) {
+        this.vutru = vutru;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public UserWebItem getUserWebItem() {
+        return userWebItem;
+    }
+
+    public void setUserWebItem(UserWebItem userWebItem) {
+        this.userWebItem = userWebItem;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+    }
 }

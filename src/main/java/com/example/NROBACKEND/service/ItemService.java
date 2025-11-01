@@ -1,49 +1,46 @@
 package com.example.NROBACKEND.service;
 
-import com.example.NROBACKEND.entity.Item;
-import com.example.NROBACKEND.entity.User;
-import com.example.NROBACKEND.repository.ItemRepository;
-import org.springframework.stereotype.Service;
 
+import com.example.NROBACKEND.entity.Item;
+import com.example.NROBACKEND.repository.ItemRepository;
+import com.example.NROBACKEND.repository.UserRepository;
+import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ItemService {
 
-    private final ItemRepository itemRepository;
+    private final ItemRepository repository;
 
-    public ItemService(ItemRepository itemRepository) {
-        this.itemRepository = itemRepository;
+    public ItemService(ItemRepository repository) {
+        this.repository = repository;
     }
 
-    public List<Item> getItemsByUser(User user) {
-        return itemRepository.findByUser(user);
+    public List<Item> getAll() {
+        return repository.findAll();
     }
 
-    public List<Item> getItemsByUserId(Long userId) {
-        return itemRepository.findByUserId(userId);
+    public Item getById(Long id) {
+        return repository.findById(id).orElse(null);
     }
 
-    public Optional<Item> getItem(Long id) {
-        return itemRepository.findById(id);
+    public List<Item> getByUserId(Long userId) {
+        return repository.findByUserId(userId);
     }
 
-    public Item saveItem(Item item) {
-        return itemRepository.save(item);
+    public Item create(Item item) {
+        return repository.save(item);
     }
 
-    public List<Item> saveAll(List<Item> items) {
-        return itemRepository.saveAll(items);
+    public Item update(Long id, Item item) {
+        if (repository.existsById(id)) {
+            item.setId(id);
+            return repository.save(item);
+        }
+        return null;
     }
 
-    public void deleteItem(Long id) {
-        itemRepository.deleteById(id);
+    public void delete(Long id) {
+        repository.deleteById(id);
     }
-
-    public void deleteByUser(User user) {
-        itemRepository.deleteByUser(user);
-    }
-
-
 }
