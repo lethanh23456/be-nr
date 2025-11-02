@@ -1,15 +1,16 @@
 package com.example.NROBACKEND.controller;
 
-
-import com.example.NROBACKEND.entity.AuthService;
+import com.example.NROBACKEND.dto.LoginRequest;
+import com.example.NROBACKEND.dto.RegisterRequest;
+import com.example.NROBACKEND.dto.AuthResponse;
 import com.example.NROBACKEND.service.AuthServiceService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
-
+@CrossOrigin(origins = "*")
 public class AuthServiceController {
 
     private final AuthServiceService service;
@@ -18,31 +19,25 @@ public class AuthServiceController {
         this.service = service;
     }
 
-    @GetMapping
-    public List<AuthService> getAll() {
-        return service.getAll();
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+        AuthResponse response = service.register(request);
+
+        if (response.getId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AuthService> getById(@PathVariable Long id) {
-        AuthService auth = service.getById(id);
-        return auth != null ? ResponseEntity.ok(auth) : ResponseEntity.notFound().build();
-    }
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        AuthResponse response = service.login(request);
 
-    @PostMapping
-    public AuthService create(@RequestBody AuthService authService) {
-        return service.create(authService);
-    }
+        if (response.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AuthService> update(@PathVariable Long id, @RequestBody AuthService authService) {
-        AuthService updated = service.update(id, authService);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 }
